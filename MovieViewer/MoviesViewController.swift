@@ -32,7 +32,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
             delegate: nil,
             delegateQueue: NSOperationQueue.mainQueue()
         )
-        
+        /*
         let task: NSURLSessionDataTask = session.dataTaskWithRequest(request,
             completionHandler: { (dataOrNil, response, error) in
                 if let data = dataOrNil {
@@ -44,7 +44,10 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                     }
                 }
         })
+
         task.resume()
+        */
+
         
         
         
