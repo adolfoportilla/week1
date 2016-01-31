@@ -18,9 +18,6 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        var hidden: true
-        
         tableView.dataSource = self
         tableView.delegate = self
         let myRequest = NSURLRequest()
