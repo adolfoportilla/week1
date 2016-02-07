@@ -16,18 +16,27 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     
     var movies: [NSDictionary]?
     
+    var endpoint: String!
+    
+    
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         tableView.dataSource = self
         tableView.delegate = self
-        let myRequest = NSURLRequest()
+        
+        
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: "refreshControlAction:", forControlEvents: UIControlEvents.ValueChanged)
         tableView.insertSubview(refreshControl, atIndex: 0)
-        
+
         func refreshControlAction(refreshControl: UIRefreshControl) {
             
             // ... Create the NSURLRequest (myRequest) ...
+            let myRequest = NSURLRequest()
             
             // Configure session so that completion handler is executed on main UI thread
             let session = NSURLSession(
@@ -36,17 +45,21 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                 delegateQueue:NSOperationQueue.mainQueue()
             )
             
-            let task : NSURLSessionDataTask = session.dataTaskWithRequest(myRequest,
-                completionHandler: { (data, response, error) in
-                    
-                    // ... Use the new data to update the data source ...
-                    
-                    // Reload the tableView now that there is new data
-                    self.tableView.reloadData()
+            let task: NSURLSessionDataTask = session.dataTaskWithRequest(myRequest,
+                completionHandler: { (dataOrNil, response, error) in
+                    if let data = dataOrNil {
+                        if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
+                            data, options:[]) as? NSDictionary {
+                                print("response: \(responseDictionary)")
+                                
+                                self.movies = responseDictionary["results"] as? [NSDictionary]
+                                self.tableView.reloadData()
                     
                     // Tell the refreshControl to stop spinning
                     refreshControl.endRefreshing()	
-            });
+                        }
+                    }
+            })
             task.resume()
         }
         
@@ -54,9 +67,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         func loadDataFromNetwork() {
             
             // ... Create the NSURLRequest (myRequest) ...
-            
-            
-            
+            let myRequest = NSURLRequest()
             
             // Configure session so that completion handler is executed on main UI thread
             let session = NSURLSession(
@@ -79,12 +90,10 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
             });
             task.resume()
         }
-
-        
         
         
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
-        let url = NSURL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
+        let url = NSURL(string: "https://api.themoviedb.org/3/movie/\(endpoint)?api_key=\(apiKey)")
         let request = NSURLRequest(
             URL: url!,
             cachePolicy: NSURLRequestCachePolicy.ReloadIgnoringLocalCacheData,
@@ -103,7 +112,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                         data, options:[]) as? NSDictionary {
                             print("response: \(responseDictionary)")
                             
-                            self.movies = responseDictionary["results"] as! [NSDictionary]
+                            self.movies = responseDictionary["results"] as? [NSDictionary]
                             self.tableView.reloadData()
                             
                     }
@@ -135,6 +144,10 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         let cell = tableView.dequeueReusableCellWithIdentifier("MovieCell", forIndexPath: indexPath) as! MovieCell
         
+        cell.selectionStyle = .None
+        
+        
+        
         let movie = movies![indexPath.row]
         let title = movie["title"] as! String
         let overview = movie["overview"] as! String
@@ -156,6 +169,9 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         cell.titleLabel.text = title
         cell.overviewLabel.text = overview
         
+        let backgroundView = UIView()
+        backgroundView.backgroundColor = UIColor.redColor()
+        cell.selectedBackgroundView = backgroundView
         
         print("row \(indexPath.row)")
         return cell
@@ -176,6 +192,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         let detailViewController = segue.destinationViewController as! DetailsViewController
         detailViewController.movie = movie
+        
         
         
         
